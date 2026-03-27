@@ -1,4 +1,3 @@
-// ACTIVITY 4 - Updated with Dedicated LDR Visual Alarm
 #include "BluetoothSerial.h"
 #include "DHT.h"
 #include <Wire.h>
