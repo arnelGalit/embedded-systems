@@ -6,7 +6,7 @@
 #define GREEN_LED 18  
 #define YELLOW_LED 19  
 #define BLUE_LED 5     
-
+ 
 DHT dht(DHTPIN, DHTTYPE);
 
 void setup() {
