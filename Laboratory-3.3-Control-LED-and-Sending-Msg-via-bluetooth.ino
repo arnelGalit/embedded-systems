@@ -6,7 +6,7 @@
 #define LED 4         // LED connected to GPIO4
 
 BluetoothSerial SerialBT;
-DHT dht(DHTPIN, DHTTYPE);
+DHT dht(DHTPIN, DHTTYPE); 
 
 void setup() {
   Serial.begin(115200);
