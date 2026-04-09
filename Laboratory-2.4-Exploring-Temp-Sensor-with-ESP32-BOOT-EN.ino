@@ -1,5 +1,5 @@
 #include "DHT.h"
-
+ 
 // Hardware Configuration
 #define DHTPIN 21
 #define DHTTYPE DHT11
