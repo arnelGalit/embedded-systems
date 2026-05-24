@@ -1,5 +1,5 @@
 // PLANT MONITORING SYSTEM 
-// LCD is commented out kasi hindi na kinkaya ng ESP32 if may LCD pa, nadi-distort yung characters display characters niya.
+// LCD is commented out kasi hindi na kinkaya ng ESP32 if may LCD pa. Nadi-distort yung characters display characters niya.
 
 #include <WiFi.h>
 #include <Wire.h>
