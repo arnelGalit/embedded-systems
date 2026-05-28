@@ -8,7 +8,11 @@
 #include <ArduinoJson.h>
 
 // Placeholder values (will be replaced by API settings)
+// IMPORTANT: set TEMP_SSID/TEMP_PASS to a network the ESP32 can join to fetch settings,
+// or run this while your dev machine is hosting an access point named accordingly.
 const char* CONFIG_URL = "http://192.168.0.33/plant_monitoring/api_settings.php?format=json";
+const char* TEMP_SSID = "ssid";      // change to a reachable temporary SSID for provisioning
+const char* TEMP_PASS = "password";  // change to the temp SSID password
 
 // Variables that will be populated from API
 char ssid[64] = "";
@@ -127,10 +131,11 @@ void setup() {
   // Or use WiFi Manager library for easier setup
   
   WiFi.mode(WIFI_STA);
-  WiFi.begin("ssid", "password"); // Temporary fallback
-  
+  WiFi.begin(TEMP_SSID, TEMP_PASS); // Temporary fallback - set these constants above
+
   int attempts = 0;
-  while (WiFi.status() != WL_CONNECTED && attempts < 20) {
+  const int maxAttempts = 40; // allow longer time to join temporary network
+  while (WiFi.status() != WL_CONNECTED && attempts < maxAttempts) {
     delay(500);
     Serial.print(".");
     attempts++;
@@ -148,7 +153,8 @@ void setup() {
       WiFi.begin(ssid, password);
       
       int attempts = 0;
-      while (WiFi.status() != WL_CONNECTED && attempts < 20) {
+      const int maxAttempts2 = 40;
+      while (WiFi.status() != WL_CONNECTED && attempts < maxAttempts2) {
         delay(500);
         Serial.print(".");
         attempts++;
@@ -181,11 +187,17 @@ void sendToDatabase(int soilPercent, float temp, float hum) {
   }
 
   HTTPClient http;
-  String url = HOST_NAME + PATH_NAME
+  // Normalize host/path: ensure no duplicate slashes
+  String host = HOST_NAME;
+  String path = PATH_NAME;
+  if (host.endsWith("/")) host.remove(host.length()-1);
+  if (!path.startsWith("/")) path = "/" + path;
+
+  String url = host + path
              + "?soil_moisture=" + String(soilPercent)
              + "&temperature="   + String(temp, 1)
              + "&humidity="      + String(hum, 1);
-
+  Serial.print("Sending to DB URL: "); Serial.println(url);
   http.begin(url);
   int code = http.GET();
   if (code == HTTP_CODE_OK) {
