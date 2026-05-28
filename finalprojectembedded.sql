@@ -1,0 +1,240 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: May 28, 2026 at 01:29 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.0.30
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `finalprojectembedded`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `sensor_data`
+--
+
+CREATE TABLE `sensor_data` (
+  `id` int(11) NOT NULL,
+  `soil_moisture` int(11) NOT NULL,
+  `temperature` decimal(4,1) NOT NULL,
+  `humidity` decimal(4,1) NOT NULL,
+  `date_recorded` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `sensor_data`
+--
+
+INSERT INTO `sensor_data` (`id`, `soil_moisture`, `temperature`, `humidity`, `date_recorded`) VALUES
+(1, 3, 31.7, 70.9, '2026-05-20 20:25:09'),
+(2, 8, 31.7, 70.9, '2026-05-20 20:25:39'),
+(3, 8, 31.8, 70.8, '2026-05-20 20:28:55'),
+(4, 8, 31.7, 70.9, '2026-05-20 20:34:50'),
+(5, 9, 31.4, 70.9, '2026-05-20 20:40:39'),
+(6, 12, 31.5, 70.1, '2026-05-20 20:46:45'),
+(7, 10, 31.7, 69.8, '2026-05-20 20:49:45'),
+(8, 10, 31.4, 70.7, '2026-05-20 20:52:46'),
+(9, 10, 31.3, 71.7, '2026-05-20 20:55:47'),
+(10, 11, 31.4, 72.0, '2026-05-20 20:58:47'),
+(11, 10, 31.4, 72.4, '2026-05-20 21:02:35'),
+(12, 9, 31.5, 72.3, '2026-05-20 21:08:08'),
+(13, 3, 31.8, 72.2, '2026-05-21 13:34:59'),
+(14, 2, 32.0, 70.1, '2026-05-21 13:37:59'),
+(15, 0, 31.8, 70.0, '2026-05-21 13:41:00'),
+(16, 0, 31.4, 73.0, '2026-05-21 21:00:24'),
+(17, 0, 31.7, 71.9, '2026-05-21 21:03:22'),
+(18, 0, 31.7, 70.6, '2026-05-21 21:06:22'),
+(19, 54, 31.7, 70.1, '2026-05-21 21:09:24'),
+(20, 0, 31.7, 69.7, '2026-05-21 21:12:24'),
+(21, 0, 31.7, 69.0, '2026-05-21 21:18:24'),
+(22, 0, 31.8, 68.3, '2026-05-21 21:21:25'),
+(23, 0, 31.8, 68.3, '2026-05-21 21:24:25'),
+(24, 0, 31.8, 68.5, '2026-05-21 21:27:26'),
+(25, 0, 31.9, 68.5, '2026-05-21 21:30:26'),
+(26, 48, 31.9, 68.2, '2026-05-21 21:33:26'),
+(27, 9, 31.9, 68.4, '2026-05-21 21:36:27'),
+(28, 9, 31.8, 68.9, '2026-05-21 21:39:28'),
+(29, 11, 31.7, 68.9, '2026-05-21 21:42:28'),
+(30, 21, 31.7, 68.9, '2026-05-21 21:45:29'),
+(31, 0, 31.4, 68.8, '2026-05-23 15:52:12'),
+(32, 0, 31.3, 69.1, '2026-05-23 15:55:13'),
+(33, 0, 31.5, 68.0, '2026-05-23 15:58:13'),
+(34, 0, 31.5, 67.9, '2026-05-23 16:01:14'),
+(35, 0, 31.7, 67.2, '2026-05-23 16:04:14'),
+(36, 0, 31.7, 67.7, '2026-05-23 16:12:01'),
+(37, 0, 31.7, 68.2, '2026-05-23 16:15:01'),
+(38, 0, 31.9, 67.6, '2026-05-23 16:18:10'),
+(39, 0, 32.0, 66.9, '2026-05-23 16:23:56'),
+(40, 0, 32.0, 67.0, '2026-05-23 16:26:56'),
+(41, 0, 32.2, 64.8, '2026-05-23 16:38:03'),
+(42, 0, 32.1, 65.2, '2026-05-23 16:41:04'),
+(43, 0, 31.9, 67.6, '2026-05-23 17:01:45'),
+(44, 0, 31.7, 68.6, '2026-05-23 17:04:46'),
+(45, 0, 31.7, 69.5, '2026-05-23 17:07:46'),
+(46, 0, 32.0, 70.6, '2026-05-23 17:48:11'),
+(47, 0, 32.1, 71.2, '2026-05-23 17:51:11'),
+(48, 0, 32.1, 71.1, '2026-05-23 17:54:12'),
+(49, 0, 32.2, 70.8, '2026-05-23 17:57:12'),
+(50, 0, 32.2, 70.6, '2026-05-23 18:00:12'),
+(51, 0, 32.2, 70.4, '2026-05-23 18:03:13'),
+(52, 0, 32.2, 70.2, '2026-05-23 18:06:13'),
+(53, 0, 32.1, 70.1, '2026-05-23 18:09:13'),
+(54, 0, 32.2, 70.2, '2026-05-23 18:12:14'),
+(55, 2, 32.1, 70.6, '2026-05-23 18:15:32'),
+(56, 2, 32.3, 63.9, '2026-05-23 18:31:17'),
+(57, 7, 32.4, 70.3, '2026-05-23 18:38:16'),
+(58, 21, 32.4, 70.6, '2026-05-23 18:41:17'),
+(59, 0, 32.3, 70.3, '2026-05-23 18:44:17'),
+(60, 0, 32.1, 73.7, '2026-05-23 19:13:00'),
+(61, 0, 32.2, 73.2, '2026-05-23 19:16:01'),
+(62, 0, 32.4, 72.1, '2026-05-23 19:24:06'),
+(63, 23, 32.2, 72.2, '2026-05-23 19:27:06'),
+(64, 5, 32.3, 72.1, '2026-05-23 19:30:07'),
+(65, 0, 32.0, 67.9, '2026-05-23 19:59:48'),
+(66, 0, 31.8, 62.3, '2026-05-23 20:02:49'),
+(67, 0, 32.0, 65.9, '2026-05-23 20:13:08'),
+(68, 46, 32.0, 66.0, '2026-05-23 20:21:48'),
+(69, 36, 32.7, 67.9, '2026-05-24 12:33:22'),
+(70, 36, 32.5, 67.3, '2026-05-24 12:36:22'),
+(71, 32, 32.7, 66.8, '2026-05-24 12:39:22'),
+(72, 33, 33.1, 65.9, '2026-05-24 12:42:22'),
+(73, 36, 32.8, 65.4, '2026-05-24 12:45:22'),
+(74, 21, 32.9, 64.8, '2026-05-24 12:48:23'),
+(75, 4, 0.0, 0.0, '2026-05-28 11:24:01'),
+(76, 0, 30.9, 75.2, '2026-05-28 11:27:01'),
+(77, 0, 31.0, 74.3, '2026-05-28 11:30:01'),
+(78, 0, 31.7, 71.0, '2026-05-28 13:39:48'),
+(79, 54, 31.5, 72.6, '2026-05-28 13:42:47'),
+(80, 51, 31.5, 72.6, '2026-05-28 13:45:47'),
+(81, 62, 31.7, 72.1, '2026-05-28 13:48:47'),
+(82, 59, 32.4, 71.3, '2026-05-28 14:01:51'),
+(83, 1, 32.3, 70.0, '2026-05-28 14:02:21'),
+(84, 0, 32.1, 70.1, '2026-05-28 14:02:52'),
+(85, 44, 32.0, 70.4, '2026-05-28 14:03:22'),
+(86, 41, 31.9, 70.8, '2026-05-28 14:03:52'),
+(87, 40, 31.8, 71.2, '2026-05-28 14:04:22'),
+(88, 40, 31.7, 71.3, '2026-05-28 14:04:52'),
+(89, 36, 31.7, 71.4, '2026-05-28 14:05:22'),
+(90, 32, 31.7, 71.4, '2026-05-28 14:05:52'),
+(91, 34, 31.6, 71.6, '2026-05-28 14:06:22');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `settings`
+--
+
+CREATE TABLE `settings` (
+  `id` int(11) NOT NULL,
+  `setting_key` varchar(100) NOT NULL,
+  `setting_value` longtext NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `settings`
+--
+
+INSERT INTO `settings` (`id`, `setting_key`, `setting_value`, `description`, `created_at`, `updated_at`) VALUES
+(1, 'wifi_ssid', 'ssid', 'WiFi Network Name', '2026-05-28 10:07:38', '2026-05-28 10:07:38'),
+(2, 'wifi_password', 'password', 'WiFi Password', '2026-05-28 10:07:38', '2026-05-28 10:07:38'),
+(3, 'server_url', 'http://192.168.0.33', 'Server Base URL', '2026-05-28 10:07:38', '2026-05-28 10:07:38'),
+(4, 'api_path', '/temperature_monitor/insert_sensor.php', 'API Endpoint Path', '2026-05-28 10:07:38', '2026-05-28 10:07:38'),
+(5, 'db_interval', '30000', 'Database Insert Interval (ms)', '2026-05-28 10:07:38', '2026-05-28 10:07:38');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `middle_name` varchar(100) DEFAULT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(150) NOT NULL,
+  `contact_number` varchar(20) DEFAULT NULL,
+  `profile_picture` longblob DEFAULT NULL,
+  `role` enum('admin','user') DEFAULT 'user',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `first_name`, `middle_name`, `last_name`, `username`, `password`, `email`, `contact_number`, `profile_picture`, `role`, `created_at`, `updated_at`) VALUES
+(1, 'Admin', NULL, 'User', 'admin', '$2y$10$vWXVEPOtClkwW0gW8z.QJeymHK3X.LmhLaUFjckHlXvVtPabYnsP.', 'admin@plantmonitor.com', '09000000000', NULL, 'admin', '2026-05-28 09:53:14', '2026-05-28 09:59:20'),
+(2, 'Leonardo', '', 'Cal', 'admin1', '$2y$10$x9XCgZma0gypCeXXA8os9eL4pju1sDjuSxmrFF4Lh0pEH2l7Vz30e', 'admin1@plantmonitoring.com', '09999112340', NULL, 'user', '2026-05-28 10:00:59', '2026-05-28 10:00:59');
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `sensor_data`
+--
+ALTER TABLE `sensor_data`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `settings`
+--
+ALTER TABLE `settings`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `setting_key` (`setting_key`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `username` (`username`),
+  ADD UNIQUE KEY `email` (`email`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `sensor_data`
+--
+ALTER TABLE `sensor_data`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=92;
+
+--
+-- AUTO_INCREMENT for table `settings`
+--
+ALTER TABLE `settings`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
