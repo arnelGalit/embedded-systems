@@ -1,0 +1,379 @@
+// PLANT MONITORING SYSTEM 
+// LCD is commented out kasi hindi na kinkaya ng ESP32 if may LCD pa. Nadi-distort yung characters display characters niya. Pero if bet niyo pa rin e tanggalin nalang comment
+
+#include <WiFi.h>
+#include <Wire.h>
+#include <DHT.h>
+#include <LiquidCrystal_I2C.h>
+#include <HTTPClient.h>
+
+//LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+// WiFi Connection - Change this if necessary
+const char* ssid     = "ssid"; 
+const char* password = "password";
+
+// Components
+const int waterLevelSensorPin = 34;
+const int soilMoisturePin     = 35;
+const int buzzerPin           = 25;
+const int ledDry              = 26;
+const int ledMoist            = 27;
+const int ledWet              = 14;
+
+// Mini Water Pump
+const int pumpPin  = 23;
+bool      pumpState = false;
+
+#define DHTPIN  4
+#define DHTTYPE DHT11
+DHT dht(DHTPIN, DHTTYPE);
+
+unsigned long lastPrintTime = 0;
+const unsigned long printInterval = 10000; // print in the serial monitor every 5 seconds - Change this if necessary
+
+unsigned long lastDHTReadTime = 0;
+const unsigned long dhtInterval = 2000;
+
+float temperature = 0.0;
+float humidity    = 0.0;
+
+// Soil Moisture Calibration
+int dryValue = 1900;
+int wetValue = 700;
+
+// DB Config
+String HOST_NAME = "http://192.168.0.33"; // Change this if necessary (ipconfig)
+String PATH_NAME = "/temperature_monitor/insert_sensor.php"; // Change this if necessary 
+
+unsigned long lastDBInsertTime = 0;
+const unsigned long dbInterval = 30000; // Send record to DB every 30 seconds - Change this if necessary
+
+WiFiServer server(80);
+
+// ---------------------------------------------------------------
+void setup() {
+  Serial.begin(115200);
+
+  pinMode(waterLevelSensorPin, INPUT);
+  pinMode(soilMoisturePin,     INPUT);
+  pinMode(buzzerPin,           OUTPUT);
+  pinMode(ledDry,              OUTPUT);
+  pinMode(ledMoist,            OUTPUT);
+  pinMode(ledWet,              OUTPUT);
+
+  dht.begin();
+
+  pinMode(pumpPin, OUTPUT);
+  digitalWrite(pumpPin, HIGH);
+
+  //Wire.begin(21, 22);
+  //lcd.init();
+  //lcd.backlight();
+
+  //lcd.setCursor(0, 0);
+  //lcd.print("Connecting to WiFi...");
+
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) { delay(500); }
+
+  //lcd.clear();
+  //lcd.setCursor(0, 0);
+  //lcd.print("WiFi Connected");
+  Serial.println("WiFi Connected! IP: " + WiFi.localIP().toString());
+
+  server.begin();
+}
+
+// ---------------------------------------------------------------
+void sendToDatabase(int soilPercent, float temp, float hum) {
+  if (WiFi.status() != WL_CONNECTED) return;
+
+  HTTPClient http;
+  String url = HOST_NAME + PATH_NAME
+             + "?soil_moisture=" + String(soilPercent)
+             + "&temperature="   + String(temp, 1)
+             + "&humidity="      + String(hum, 1);
+
+  http.begin(url);
+  int code = http.GET();
+  if (code == HTTP_CODE_OK) {
+    Serial.println("DB OK: " + http.getString());
+  } else {
+    Serial.printf("DB failed. HTTP %d\n", code);
+  }
+  http.end();
+}
+
+// ---------------------------------------------------------------
+void loop() {
+  int sensorValue = analogRead(waterLevelSensorPin);
+  int soilValue   = analogRead(soilMoisturePin);
+
+  unsigned long now = millis();
+
+  // Soil %
+  int soilPercent = constrain(map(soilValue, dryValue, wetValue, 0, 100), 0, 100);
+
+  // DB insert every dbInterval
+  if (now - lastDBInsertTime >= dbInterval) {
+    lastDBInsertTime = now;
+    sendToDatabase(soilPercent, temperature, humidity);
+  }
+
+  // ---- THRESHOLD ------------------------------------------------
+
+  // Soil moisture threshold and description
+  String soilStatus, systemAction;
+  if      (soilPercent < 25)  { soilStatus = "DRY";   systemAction = "The soil is dry. Watering is recommended."; }
+  else if (soilPercent <= 70) { soilStatus = "MOIST"; systemAction = "Soil has adequate moisture for healthy plant growth."; }
+  else                        { soilStatus = "WET";   systemAction = "Too much water. Stop watering!"; }
+
+  // Water level threshold and description
+  String status;
+  int waterPercent;
+  if      (sensorValue <= 100)  { status = "Empty!"; waterPercent = 0; }
+  else if (sensorValue <= 800)  { status = "Low";    waterPercent = 20; }
+  else if (sensorValue <= 1900) { status = "Half";   waterPercent = 55; }
+  else                          { status = "Full";   waterPercent = 95; }
+
+  // Temperature threshold and description
+  String tempStatus, tempDesc;
+  if      (temperature > 35)                            { tempStatus = "Extreme Heat";     tempDesc = "High evaporation rate; severe wilting and heat stress risk"; }
+  else if (temperature >= 28 && temperature <= 35)      { tempStatus = "Warm";             tempDesc = "Plants consume water faster; monitor soil moisture closely"; }
+  else if (temperature >= 18 && temperature <= 27)      { tempStatus = "Optimal";          tempDesc = "Ideal growth range for most tropical and indoor plants"; }
+  else                                                  { tempStatus = "Cold Environment"; tempDesc = "Plant metabolism slows; growth becomes slower"; }
+
+  // Humidity threshold and description
+  String humidityStatus, humidityDesc, humidityPrefix;
+  if      (humidity > 80)                         { humidityPrefix = "STATUS"; humidityStatus = "Excessively Humid"; humidityDesc = "High risk of leaf mold, fungus, and stagnant air"; }
+  else if (humidity >= 50 && humidity <= 80)      { humidityPrefix = "STATUS"; humidityStatus = "Optimal Humidity";  humidityDesc = "Perfect transpiration zone for healthy leaf respiration"; }
+  else if (humidity >= 30 && humidity <= 49)      { humidityPrefix = "STATUS"; humidityStatus = "Dry Air";           humidityDesc = "Harmless for short periods, but watch for crisp leaf edges"; }
+  else                                            { humidityPrefix = "ALERT";  humidityStatus = "Extremely Dry";     humidityDesc = "Air is too dry; plant will lose moisture rapidly"; }
+
+  if (now - lastDHTReadTime >= dhtInterval) {
+  lastDHTReadTime = now;
+  float t = dht.readTemperature();
+  float h = dht.readHumidity();
+  if (!isnan(t) && !isnan(h)) { temperature = t; humidity = h; }
+
+  Serial.println("========== SENSOR READINGS ==========");
+  Serial.print("Soil Moisture : "); Serial.print(soilPercent); Serial.print("% ("); Serial.print(soilStatus); Serial.println(")");
+  Serial.print("Temperature   : "); Serial.print(temperature, 1); Serial.println(" C"); 
+  Serial.print("Humidity      : "); Serial.print(humidity, 1); Serial.println("%"); 
+  Serial.println("=====================================");
+}
+
+  // ---- LEDs ----------------------------------------------------
+  digitalWrite(ledDry,   soilStatus == "DRY"   ? HIGH : LOW);
+  digitalWrite(ledMoist, soilStatus == "MOIST" ? HIGH : LOW);
+  digitalWrite(ledWet,   soilStatus == "WET"   ? HIGH : LOW);
+
+  // ---- Buzzer --------------------------------------------------
+  if (soilStatus == "DRY") {
+    for (int i = 0; i < 3; i++) {
+      digitalWrite(buzzerPin, HIGH); delay(80);
+      digitalWrite(buzzerPin, LOW);  delay(80);
+    }
+    delay(400);
+  } else {
+    digitalWrite(buzzerPin, LOW);
+  }
+
+  // ---- LCD -----------------------------------------------------
+  //lcd.clear();
+  //lcd.setCursor(0, 0); lcd.print("Plant Monitoring System");
+  //lcd.setCursor(0, 1); lcd.print("SML:"); lcd.print(soilPercent); lcd.print("%-"); lcd.print(soilStatus);
+
+  // ---- Web Server ----------------------------------------------
+  WiFiClient client = server.available();
+  if (!client) { delay(10); return; }
+
+  String request = client.readStringUntil('\r');
+  client.flush();
+
+  // Pump control
+  if      (request.indexOf("GET /pump_on")  != -1) { if (soilStatus == "DRY") pumpState = true; }
+  else if (request.indexOf("GET /pump_off") != -1) { pumpState = false; }
+  digitalWrite(pumpPin, pumpState ? LOW : HIGH);
+
+  // Quick acknowledgement for pump requests
+  if (request.indexOf("GET /pump_") != -1) {
+    client.println("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n");
+    Serial.println(pumpState ? "PUMPING WATER..." : "OFF");
+    client.stop();
+    return;
+  }
+
+  // ==============================================================
+  //  DASHBOARD HTML 
+  // ==============================================================
+
+  String soilColor   = (soilStatus == "DRY")   ? "#e53935" : (soilStatus == "MOIST") ? "#1e88e5" : "#43a047";
+  String statusColor = (status == "Empty!" || status == "Low") ? "#e53935" : (status == "Half") ? "#fb8c00" : "#43a047";
+  String tempColor   = (tempStatus == "Extreme Heat")     ? "#e53935"
+                     : (tempStatus == "Warm")             ? "#fb8c00"
+                     : (tempStatus == "Optimal")          ? "#43a047"
+                     :                                      "#1e88e5";  
+  String humColor    = (humidityStatus == "Excessively Humid") ? "#e53935"
+                     : (humidityStatus == "Optimal Humidity")  ? "#43a047"
+                     : (humidityStatus == "Dry Air")           ? "#fb8c00"
+                     :                                           "#e53935"; 
+
+  // Soil donut (r=54, circumference≈339.3)
+  float circ    = 339.3;
+  float dashVal = (soilPercent / 100.0) * circ;
+  String dashArr = String(dashVal, 1) + " " + String(circ - dashVal, 1);
+
+  String html = "";
+  html += "<!DOCTYPE html><html lang='en'><head>";
+  html += "<meta charset='UTF-8'>";
+  html += "<meta name='viewport' content='width=device-width,initial-scale=1'>";
+  html += "<title>Plant Monitoring System</title>";
+
+  // ---- CSS ----
+  html += "<style>";
+  html += ":root{";
+  html += "--font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;";
+  html += "--green:#2e7d32;--body-bg:#f1f8f1;--card:#fff;--shadow:0 3px 14px rgba(0,0,0,.07);--r:14px;";
+  html += "}";
+  html += "*{box-sizing:border-box;margin:0;padding:0;}";
+  html += "body{font-family:var(--font);background:var(--body-bg);min-height:100vh;padding:20px 14px 40px;}";
+
+  // Header
+  html += "header{text-align:center;margin-bottom:24px;}";
+  html += "header h1{font-size:1.5rem;font-weight:800;color:var(--green);}";
+  html += "header p{color:#888;font-size:.82rem;margin-top:3px;}";
+
+  // Grid — 3 equal columns
+  html += ".grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:900px;margin:0 auto;}";
+  html += "@media(max-width:640px){.grid{grid-template-columns:1fr;}}";
+
+  // Card
+  html += ".card{background:var(--card);border-radius:var(--r);padding:18px 16px;box-shadow:var(--shadow);}";
+  html += ".card-label{font-size:.72rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}";
+
+  // Badge pill
+  html += ".badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:.75rem;font-weight:700;color:#fff;}";
+
+  // Big number
+  html += ".big{font-size:2rem;font-weight:800;color:#222;line-height:1;margin:6px 0;}";
+
+  // Small description text
+  html += ".desc{font-size:.76rem;color:#777;line-height:1.45;margin-top:6px;}";
+
+  // Status line (STATUS: / ALERT:)
+  html += ".status-line{font-size:.78rem;font-weight:700;margin-top:8px;}";
+
+  // Soil action text
+  html += ".action{font-size:.78rem;font-weight:600;margin-top:6px;}";
+
+  // Pump button
+  html += ".pump-btn{width:100%;margin-top:12px;padding:11px 0;background:#1565c0;color:#fff;border:none;";
+  html += "border-radius:10px;font-size:.88rem;font-weight:700;cursor:pointer;box-shadow:0 3px #0d47a1;transition:.1s;}";
+  html += ".pump-btn:active{box-shadow:0 1px #0d47a1;transform:translateY(2px);}";
+  html += ".pump-btn:disabled{background:#bbb;box-shadow:0 3px #999;cursor:not-allowed;transform:none;}";
+
+  // Row inside card (for water level)
+  html += ".row{display:flex;justify-content:space-between;align-items:center;margin-top:4px;}";
+
+  // Link to records
+  html += ".records-link{display:block;text-align:center;margin:18px auto 0;max-width:900px;";
+  html += "background:var(--green);color:#fff;padding:11px;border-radius:12px;font-size:.9rem;font-weight:700;text-decoration:none;}";
+  html += ".records-link:hover{background:#1b5e20;}";
+
+  html += "</style>";
+
+  // ---- ----
+  html += "<script>";
+  html += "function startPump(){fetch('/pump_on');}";
+  html += "function stopPump(){fetch('/pump_off');}";
+  html += "setInterval(function(){if(document.activeElement.id!=='pumpBtn')location.reload();},3000);";
+  html += "</script>";
+
+  html += "</head><body>";
+  html += "<header><h1>&#127807; Plant Monitoring System</h1><p>Your Plant’s Best Friend.</p></header>";
+
+  html += "<div class='grid'>";
+
+  // ---- CARD 1: Water Tank Level ----
+  html += "<div class='card' style='display:flex;flex-direction:column;align-items:center;text-align:center;'>";
+  html += "<div class='card-label' style='align-self:flex-start;'>Water Tank Level</div>";
+
+  // Wave SVG
+  html += "<div style='position:relative;width:120px;height:170px;border-radius:12px;overflow:hidden;border:1.5px solid #2d3748;background:#1c2330;margin:8px 0;'>";
+  html += "<svg xmlns='http://www.w3.org/2000/svg' style='position:absolute;bottom:0;left:0;width:100%;height:100%;' viewBox='0 0 120 170' preserveAspectRatio='none'>";
+  html += "<path id='w1' fill='" + statusColor + "' opacity='0.85'/>";
+  html += "<path id='w2' fill='" + statusColor + "' opacity='0.4'/>";
+  html += "</svg>";
+  html += "<div style='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:none;'>";
+  html += "<span style='font-size:2rem;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.4);line-height:1;'>" + String(waterPercent) + "%</span>";
+  html += "<span style='font-family:DM Mono,monospace;font-size:.7rem;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.05em;text-shadow:0 1px 3px rgba(0,0,0,.3);'>" + status + "</span>";
+  html += "</div>";
+  html += "</div>"; // tank
+
+  html += "<span style='font-family:DM Mono,monospace;font-size:.7rem;color:#8b949e;margin-top:4px;'>RAW Value &nbsp;/&nbsp; " + String(sensorValue) + "</span>";
+  html += "</div>"; // card
+
+  // Wave animation script 
+  html += "<script>";
+  html += "var _wp=0,_wp2=Math.PI,_wlv=" + String(waterPercent) + ",_wcur=" + String(waterPercent) + ";";
+  html += "function _wwave(amp,freq,ph,yb,W,H){var p=[];for(var x=0;x<=W;x+=3){p.push(x+','+(yb+Math.sin((x/W)*freq*Math.PI*2+ph)*amp).toFixed(1));}return 'M0,'+H+' L0,'+p[0].split(',')[1]+' '+p.map(function(v){return 'L'+v;}).join(' ')+' L'+W+','+H+' Z';}";
+  html += "function _wanim(){_wp+=.04;_wp2+=.025;_wcur+=(_wlv-_wcur)*.06;";
+  html += "var yb=170-((_wcur/100)*170),amp=5+(_wcur/100)*5;";
+  html += "var e1=document.getElementById('w1'),e2=document.getElementById('w2');";
+  html += "if(e1){e1.setAttribute('d',_wwave(amp,2,_wp,yb,120,170));e2.setAttribute('d',_wwave(amp*.7,3,_wp2,yb+3,120,170));}";
+  html += "requestAnimationFrame(_wanim);}";
+  html += "_wanim();";
+  html += "<\/script>";
+
+  // ---- CARD 2: Soil Moisture ----
+  html += "<div class='card' style='display:flex;flex-direction:column;align-items:center;'>";
+  html += "<div class='card-label' style='align-self:flex-start;'>Soil Moisture</div>";
+
+  // Donut SVG
+  html += "<svg width='110' height='110' viewBox='0 0 130 130'>";
+  html += "<circle cx='65' cy='65' r='54' fill='none' stroke='#eee' stroke-width='13'/>";
+  html += "<circle cx='65' cy='65' r='54' fill='none' stroke='" + soilColor + "' stroke-width='13'";
+  html += " stroke-dasharray='" + dashArr + "' stroke-linecap='round' transform='rotate(-90 65 65)'/>";
+  html += "<text x='65' y='70' text-anchor='middle' font-family='-apple-system,sans-serif' font-weight='800' font-size='24' fill='#222'>" + String(soilPercent) + "%</text>";
+  html += "</svg>";
+  html += "<span class='badge' style='background:" + soilColor + ";margin-top:4px;'>" + soilStatus + "</span>";
+  html += "<p class='action' style='color:" + soilColor + ";text-align:center;'>" + systemAction + "</p>";
+  bool canPump = (soilStatus == "DRY");
+  html += "<button id='pumpBtn' class='pump-btn'";
+  if (!canPump) html += " disabled";
+  html += " onmousedown='startPump()' onmouseup='stopPump()' ontouchstart='startPump()' ontouchend='stopPump()'>";
+  html += "HOLD TO PUMP WATER</button>";
+  html += "</div>";
+
+  // ---- CARD 3: Temperature & Humidity ----
+  html += "<div class='card'>";
+
+  // Temperature
+  html += "<div class='card-label'>Temperature</div>";
+  html += "<div class='big'>" + String(temperature, 1) + "<span style='font-size:1rem;font-weight:600;color:#666;'> &deg;C</span></div>";
+  html += "<div class='status-line' style='color:" + tempColor + ";'>STATUS: " + tempStatus + "</div>";
+  html += "<div class='desc'>" + tempDesc + "</div>";
+
+  html += "<hr style='border:none;border-top:1px solid #f0f0f0;margin:14px 0;'/>";
+
+  // Humidity
+  html += "<div class='card-label'>Humidity</div>";
+  html += "<div class='big'>" + String(humidity, 1) + "<span style='font-size:1rem;font-weight:600;color:#666;'> %</span></div>";
+  html += "<div class='status-line' style='color:" + humColor + ";'>" + humidityPrefix + ": " + humidityStatus + "</div>";
+  html += "<div class='desc'>" + humidityDesc + "</div>";
+
+  html += "</div>"; // end card 3
+  html += "</div>"; // end grid
+
+  html += "<a class='records-link' href='http://192.168.0.33/temperature_monitor/dashboard.php'> View Charts and History </a>"; // Change this if necessary (ipconfig)
+  html += "</body></html>";
+
+  client.println("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n");
+  client.print(html);
+  client.stop();
+  delay(10);
+}
+
+

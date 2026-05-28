@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 28, 2026 at 08:11 AM
+-- Generation Time: May 28, 2026 at 01:29 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `plant_monitoring`
+-- Database: `finalprojectembedded`
 --
 
 -- --------------------------------------------------------
@@ -132,6 +132,61 @@ INSERT INTO `sensor_data` (`id`, `soil_moisture`, `temperature`, `humidity`, `da
 (90, 32, 31.7, 71.4, '2026-05-28 14:05:52'),
 (91, 34, 31.6, 71.6, '2026-05-28 14:06:22');
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `settings`
+--
+
+CREATE TABLE `settings` (
+  `id` int(11) NOT NULL,
+  `setting_key` varchar(100) NOT NULL,
+  `setting_value` longtext NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `settings`
+--
+
+INSERT INTO `settings` (`id`, `setting_key`, `setting_value`, `description`, `created_at`, `updated_at`) VALUES
+(1, 'wifi_ssid', 'ssid', 'WiFi Network Name', '2026-05-28 10:07:38', '2026-05-28 10:07:38'),
+(2, 'wifi_password', 'password', 'WiFi Password', '2026-05-28 10:07:38', '2026-05-28 10:07:38'),
+(3, 'server_url', 'http://192.168.0.33', 'Server Base URL', '2026-05-28 10:07:38', '2026-05-28 10:07:38'),
+(4, 'api_path', '/temperature_monitor/insert_sensor.php', 'API Endpoint Path', '2026-05-28 10:07:38', '2026-05-28 10:07:38'),
+(5, 'db_interval', '30000', 'Database Insert Interval (ms)', '2026-05-28 10:07:38', '2026-05-28 10:07:38');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `middle_name` varchar(100) DEFAULT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(150) NOT NULL,
+  `contact_number` varchar(20) DEFAULT NULL,
+  `profile_picture` longblob DEFAULT NULL,
+  `role` enum('admin','user') DEFAULT 'user',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `first_name`, `middle_name`, `last_name`, `username`, `password`, `email`, `contact_number`, `profile_picture`, `role`, `created_at`, `updated_at`) VALUES
+(1, 'Admin', NULL, 'User', 'admin', '$2y$10$vWXVEPOtClkwW0gW8z.QJeymHK3X.LmhLaUFjckHlXvVtPabYnsP.', 'admin@plantmonitor.com', '09000000000', NULL, 'admin', '2026-05-28 09:53:14', '2026-05-28 09:59:20'),
+(2, 'Leonardo', '', 'Cal', 'admin1', '$2y$10$x9XCgZma0gypCeXXA8os9eL4pju1sDjuSxmrFF4Lh0pEH2l7Vz30e', 'admin1@plantmonitoring.com', '09999112340', NULL, 'user', '2026-05-28 10:00:59', '2026-05-28 10:00:59');
+
 --
 -- Indexes for dumped tables
 --
@@ -143,6 +198,21 @@ ALTER TABLE `sensor_data`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `settings`
+--
+ALTER TABLE `settings`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `setting_key` (`setting_key`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `username` (`username`),
+  ADD UNIQUE KEY `email` (`email`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -151,6 +221,18 @@ ALTER TABLE `sensor_data`
 --
 ALTER TABLE `sensor_data`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=92;
+
+--
+-- AUTO_INCREMENT for table `settings`
+--
+ALTER TABLE `settings`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
