@@ -429,7 +429,7 @@ while ($row = $result->fetch_assoc()) {
 <body>
     <div class="container">
         <header>
-            <h1>👥 User Management</h1>
+            <h1> User Management</h1>
             <div class="btn-group">
                 <button class="btn-primary" onclick="openCreateUserModal()">+ Create New User</button>
                 <a href="live_dashboard.php" class="btn-secondary">← Back to Dashboard</a>

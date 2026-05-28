@@ -299,7 +299,7 @@ while ($row = $result->fetch_assoc()) {
 
         <div class="card">
             <div class="info-box">
-                <strong>📱 ESP32 API Endpoint:</strong><br>
+                <strong>ESP32 API Endpoint:</strong><br>
                 <code>http://localhost/plant_monitoring/api_settings.php?format=json</code><br>
                 The ESP32 reads these settings from this endpoint on startup.
             </div>
@@ -307,7 +307,7 @@ while ($row = $result->fetch_assoc()) {
             <form method="POST">
                 <!-- WiFi Settings -->
                 <div class="setting-group">
-                    <div class="section-title">📡 WiFi Configuration</div>
+                    <div class="section-title">WiFi Configuration</div>
 
                     <div class="form-group">
                         <div class="label-with-help">
@@ -330,7 +330,7 @@ while ($row = $result->fetch_assoc()) {
 
                 <!-- Server Settings -->
                 <div class="setting-group">
-                    <div class="section-title">🌐 Server Configuration</div>
+                    <div class="section-title"> Server Configuration</div>
 
                     <div class="form-group">
                         <div class="label-with-help">
@@ -353,7 +353,7 @@ while ($row = $result->fetch_assoc()) {
 
                 <!-- Device Settings -->
                 <div class="setting-group">
-                    <div class="section-title">⏱️ Device Configuration</div>
+                    <div class="section-title">⏱Device Configuration</div>
 
                     <div class="form-group">
                         <div class="label-with-help">

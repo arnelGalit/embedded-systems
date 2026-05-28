@@ -344,7 +344,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="password" id="password" name="password" placeholder="Enter your password" required>
                 </div>
 
-                <button type="submit" class="login-btn">🔓 Login</button>
+                <button type="submit" class="login-btn">Login</button>
             </form>
 
             <div class="divider">
@@ -353,8 +353,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="demo-info">
                 <strong>Try these credentials:</strong>
-                <div class="demo-item">👤 Username: <code>admin</code></div>
-                <div class="demo-item">🔐 Password: <code>admin123</code></div>
+                <div class="demo-item">Username: <code>admin</code></div>
+                <div class="demo-item">Password: <code>admin123</code></div>
             </div>
         </div>
     </div>

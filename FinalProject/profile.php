@@ -381,7 +381,7 @@ if (isset($_GET['logout'])) {
                 </div>
             </form>
 
-            <button class="password-btn" onclick="openPasswordModal()">🔐 Change Password</button>
+            <button class="password-btn" onclick="openPasswordModal()">Change Password</button>
         </div>
 
         <div style="text-align: center; margin-top: 30px;">

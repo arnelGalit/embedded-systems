@@ -129,16 +129,16 @@
             <div class="user-email"><?php echo htmlspecialchars($_SESSION['email']); ?></div>
         </div>
 
-        <a href="profile.php">👤 Edit Profile</a>
+        <a href="profile.php">Edit Profile</a>
 
         <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-            <a href="users_manager.php">👥 View Users</a>
-            <a href="api_settings.php">⚙️ Settings</a>
+            <a href="users_manager.php">View Users</a>
+            <a href="api_settings.php">Settings</a>
         <?php endif; ?>
 
         <div class="dropdown-divider"></div>
 
-        <a href="login.php?logout=1" class="logout">🚪 Logout</a>
+        <a href="login.php?logout=1" class="logout"> Logout</a>
     </div>
 </div>
 

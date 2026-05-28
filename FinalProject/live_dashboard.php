@@ -294,7 +294,7 @@ header p{
       </div>
     </div>
 
-    <span style="font-family:DM Mono,monospace;font-size:.7rem;color:#8b949e;margin-top:4px;">Soil Moisture Value: <?php echo $soilPercent; ?>%</span>
+    <span style="font-family:DM Mono,monospace;font-size:.7rem;color:#8b949e;margin-top:4px;">Water Tank Level: <?php echo $waterPercent; ?>%</span>
   </div>
 
   <!-- CARD 2: Soil Moisture -->
@@ -346,7 +346,7 @@ header p{
 </div>
 
 <div class="nav-links">
-  <a class="records-link" href="dashboard.php">📊 View Charts & History</a>
+  <a class="records-link" href="dashboard.php"> View Charts & History</a>
 </div>
 
 <script>
