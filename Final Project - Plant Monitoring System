@@ -47,7 +47,7 @@ String HOST_NAME = "http://192.168.0.33"; // Change this if necessary (ipconfig)
 String PATH_NAME = "/temperature_monitor/insert_sensor.php"; // Change this if necessary 
 
 unsigned long lastDBInsertTime = 0;
-const unsigned long dbInterval = 180000; // Send record to DB every 3 minutes - Change this if necessary
+const unsigned long dbInterval = 30000; // Send record to DB every 30 seconds - Change this if necessary
 
 WiFiServer server(80);
 
