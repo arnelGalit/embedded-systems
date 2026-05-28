@@ -375,5 +375,3 @@ void loop() {
   client.stop();
   delay(10);
 }
-
-
